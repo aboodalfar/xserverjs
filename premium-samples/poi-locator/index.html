@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>POI Locator Demo</title>
+    <meta charset="utf-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen@1.0.2/dist/leaflet.fullscreen.css" />
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" />
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html,
+        body,
+        #map {
+            height: 100%;
+        }
+
+        #myForm>div {
+            margin-bottom: 4px;
+        }
+
+        .info {
+            padding: 6px 8px;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        div.controlPanel {
+            padding: 10px;
+            background: rgb(255, 255, 255);
+            max-height: 50em;
+            overflow-y: auto;
+            display: inline-block;
+            color: rgb(75, 74, 77);
+            /* PTV solid silver I */
+            text-decoration: none;
+            box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.65);
+            border-radius: 5px;
+        }
+
+        .legend {
+            width: 180px;
+            overflow-y: auto;
+            display: inline-block;
+            color: rgb(75, 74, 77);
+            text-decoration: none;
+            box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.65);
+            border-radius: 5px;
+            text-align: left;
+            line-height: 19px;
+        }
+
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 3px;
+            opacity: 1;
+            border-style: solid;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="panel-control" class="controlPanel" style="width:292px">
+        <form id="paramForm" class="pure-form">
+            <fieldset id="myFieldSet">
+                <legend>Click on map, drag the red pin or search an address</legend>
+                <div class="pure-g">
+                    <div class="pure-u-2-3"><input type="text" id="f1" value="Karlsruhe, Haid-und-Neu-Straße 15"></div>
+                    <div class="pure-u-1-3"><input type="button" id="b1" class="pure-button" value="Geocode" onClick="findByAddress(document.getElementById('f1').value);"></div>
+                </div>
+                <div class="pure-g" style="padding-top:6px">
+                    <div class="pure-u-2-3">Or find by geo-location</div>
+                    <div class="pure-u-1-3"><input type="button" class="pure-button" value="Geolocate" onClick="findByGeolocation();"></div>
+                </div>
+                <div class="pure-g" style="padding-top:6px">
+                        <div class="pure-u-2-3"><label for="type">Additionally filter by location type</label></div>
+                        <div class="pure-u-1-3">
+                            <select id="type" form="paramForm" onchange="filterPois()">
+                            <option>---</option>
+                            <option>DIY</option>
+                            <option>RET</option>
+                            <option>DRG</option>
+                            <option>FRN</option>
+                            <option>FIN</option>
+                            <option>COM</option>
+                            <option>EAT</option>
+                            <option>PHA</option>
+                            <option>KFZ</option>
+                            <option>CLO</option>
+                            <option>FOD</option>
+                            <option>LEH</option>
+                            <option>TVL</option>
+                            <option>LSR</option>
+                            <option>GAS</option>
+                            </select>
+                        </div>
+                    </div>
+                <div style="padding-top:6px">Search method</div>
+                <div class="pure-g">
+                    <div class="pure-u-1-3"><input type="radio" name="searchmethod" checked="true" onclick="setSearchMethod(0);">airline</div>
+                    <div class="pure-u-1-3"><input type="radio" name="searchmethod" onclick="setSearchMethod(1);">1:n routing</div>
+                    <div class="pure-u-1-3"><input type="radio" name="searchmethod" onclick="setSearchMethod(2);">isochrone</div>
+                </div>
+                <div style="padding-top:6px">Horizon</div>
+                <div class="pure-g">
+                    <div class="pure-u-1-3"><input type="radio" name="horizon" checked="true" onclick="setHorizon(900);">15 min</div>
+                    <div class="pure-u-1-3"><input type="radio" name="horizon" onclick="setHorizon(1800);">30 min</div>
+                    <div class="pure-u-1-3"><input type="radio" name="horizon" onclick="setHorizon(3600);">60 min</div>
+                </div>
+                <div style="padding-top:6px">Or find stores by name</div>
+                <div class="pure-g">
+                    <div class="pure-u-2-3"><input type="text" id="f2" value="OBI"></div>
+                    <div class="pure-u-1-3"><input type="button" id="b2" class="pure-button " value="Find" onClick="findFulltext(document.getElementById('f2').value);"></div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/d3@4.8.0/build/d3.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-fullscreen@1.0.2/dist/Leaflet.fullscreen.min.js"></script>
+    <script src="https://unpkg.com/leaflet-pip@1.1.0/leaflet-pip.min.js"></script>
+    <script src="https://unpkg.com/lunr@1.0.0/lunr.min.js"></script>
+    <script src="./leaflet-marker-booster.js"></script>
+    <script src="./helper.js"></script>
+    <script src="../../token.js"></script>
+    <script src="./index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Welcome to xMap-2 @Kendo-UI</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2018.3.1017/styles/kendo.common.min.css" />
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2018.3.1017/styles/kendo.blueopal.min.css" />
+
+    <script src="https://kendo.cdn.telerik.com/2017.2.621/js/jquery.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2018.3.1017/js/kendo.all.min.js"></script>
+    <script src="../token.js"></script>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html,
+        body,
+        #map {
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        function createMap() {
+            $("#map").kendoMap({
+                center: [49.01405, 8.4044],
+                zoom: 10,
+                layers: [{
+                    type: 'tile',
+                    urlTemplate: 'https://s0#= subdomain #-xserver2-test.cloud.ptvgroup.com/services/rest/XMap/tile/' +
+                        '#= zoom #/#= x #/#= y #?xtok=' + token,
+                    subdomains: ['1', '2', '3', '4'],
+                    attribution: '&copy; ' + new Date().getFullYear() + ' PTV AG, HERE'
+                }],
+                markers: [{
+                    location: [49.01405, 8.4044],
+                    shape: "pinTarget",
+                    tooltip: {
+                        content: "Karlsruhe, BW"
+                    }
+                }]
+            });
+        }
+
+        $(document).ready(createMap);
+    </script>
+</body>
+
+</html>

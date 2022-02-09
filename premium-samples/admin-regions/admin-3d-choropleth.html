@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <!-- Tell IE to use the latest version. -->
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+    <!-- This single-page Cesium application demonstrates the ability to request CZML from the server. -->
+    <title>Example page for xMap2 @Cesium</title>
+
+    <script src="https://unpkg.com/cesium@1.89.0/Build/Cesium/Cesium.js"></script>
+    <script src="../../token.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/cesium@1.89.0/Build/Cesium/Widgets/widgets.css" />
+    <style>
+        body,
+        #viewerContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="viewerContainer">
+
+        <div style="position:absolute; z-Index: 1; margin:0.4em; text-shadow:0 0 2px #000000">
+            <div>
+                <input type="checkbox" onchange="terrainChanged(this)">Terrain</input>
+            </div>
+            <div>
+                <input type="checkbox" onchange="lightningChanged(this)">Lightning</input>
+            </div>
+            <div>
+                <input type="checkbox" onchange="fogChanged(this)">Fog</input>
+            </div>
+        </div>
+    </div>
+    <script>
+        var getXMapViewModel = function (profile) {
+            return new Cesium.ProviderViewModel({
+                name: 'PTV_' + profile,
+                iconUrl: '../../images/xmap_logo.png',
+                tooltip: 'PTV ' + profile + ' style',
+                creationFunction: function () {
+                    return new Cesium.UrlTemplateImageryProvider({
+                        url: 'https://s0{s}-xserver2-test.cloud.ptvgroup.com/services/rest/XMap/tile/{z}/{x}/{y}?storedProfile=' +
+                            profile + '&xtok=' + token,
+                        credit: '&copy; ' + new Date().getFullYear() + ' PTV AG, HERE',
+                        subdomains: ['1', '2', '3', '4'],
+                        maximumLevel: 22
+                    });
+                }
+            });
+        };
+
+        Cesium.Camera.DEFAULT_VIEW_FACTOR = 0.3;
+        Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(10,51,10,51);
+
+        //Create the list of available providers we would like the user to select from.
+        var imageryViewModels = [];
+        imageryViewModels.push(getXMapViewModel('classic'));
+        imageryViewModels.push(getXMapViewModel('silica'));
+        imageryViewModels.push(getXMapViewModel('blackmarble'));
+        imageryViewModels.push(getXMapViewModel('silkysand'));
+        imageryViewModels.push(getXMapViewModel('sandbox'));
+        imageryViewModels.push(getXMapViewModel('gravelpit'));
+
+        // The following line creates the Cesium viewer with all the default widgets on it.
+        var viewer = window.viewer = new Cesium.Viewer('viewerContainer', {
+            imageryProviderViewModels: imageryViewModels,
+            geocoder: false
+        });
+
+        viewer.scene.fog.enabled = false;
+        viewer.baseLayerPicker.viewModel.selectedImagery = imageryViewModels[5];
+
+        // var promise = Cesium.GeoJsonDataSource.load('./data/districts-de-topo.json');
+        var promise = Cesium.GeoJsonDataSource.load(
+            'https://raw.githubusercontent.com/ptv-logistics/xserverjs/master/premium-samples/admin-regions/data/districts-de-topo.json'
+        );
+        promise.then(function (dataSource) {
+            viewer.dataSources.add(dataSource);
+
+            //Get the array of entities
+            var entities = dataSource.entities.values;
+
+            for (var i = 0; i < entities.length; i++) {
+                var entity = entities[i];
+
+                //Set color based on population density
+                var color = Cesium.Color.fromHsl(0.4 - 0.4 * Math.pow(entity.properties.popdens / 4000.0, 0.25),
+                    1.0, 0.5).withAlpha(0.8);
+
+                //Set the polygon material to our color.
+                entity.polygon.material = color;
+
+                //Set the outlines.
+                entity.polygon.closeTop = true;
+                entity.polygon.closeBottom = false;
+
+                entity.polygon.outline = true;
+                entity.polygon.outlineColor = Cesium.Color.BLACK; //.withAlpha(0.5);
+                entity.polygon.outlineWidth = 1.0; // not supported on win https://github.com/AnalyticalGraphicsInc/cesium/issues/4223
+
+                entity.polygon.shadows = Cesium.ShadowMode.ENABLED;
+
+                //Extrude the polygon based on the state's population density.  
+                entity.polygon.extrudedHeight = entity.properties.popdens * 10;
+            }
+        });
+        //Set the camera to a DE centered tilted view and switch back to moving in world coordinates.
+        viewer.camera.lookAt(Cesium.Cartesian3.fromDegrees(10.0, 49.0), new Cesium.Cartesian3(0.0, -600000.0, 400000.0));
+        viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+
+        function terrainChanged(element) {
+            var idx = element.checked ? 1 : 0;
+            viewer.baseLayerPicker.viewModel.selectedTerrain = viewer.baseLayerPicker.viewModel.terrainProviderViewModels[
+                idx];
+        }
+
+        function lightningChanged(element) {
+            viewer.scene.globe.enableLighting = element.checked;
+        }
+
+        function fogChanged(element) {
+            viewer.scene.fog.enabled = element.checked;
+        }
+    </script>
+</body>
+
+</html>

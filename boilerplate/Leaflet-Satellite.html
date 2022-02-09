@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>xServer-Here sample</title>
+    <meta charset="utf-8" />
+
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html,
+        body,
+        #map {
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- leaflet-xserver is used for auto-attribution of the layer -->
+    <script src="https://unpkg.com/leaflet-xserver@1.1.5/dist/leaflet-xserver.js"></script>
+    <script src="../token.js"></script>
+    <script>
+        var here_app_id = '';
+        var here_app_code = '';
+        var xsi_token = window.token;
+
+        var map = L.map('map', {
+            maxZoom: 22
+        }).setView(new L.LatLng(49.01405, 8.4044), 14);
+
+        var getLayer = function (layers) {
+            return L.tileLayer(
+                'https://s0{s}-xserver2-test.cloud.ptvgroup.com/services/rest/XMap/tile/{z}/{x}/{y}' +
+                '?storedProfiles={storedProfile}&layers={layers}&xtok={token}&userLanguage=en&timeConsideration=SNAPSHOT&referenceTime={referenceTime}', {
+                    storedProfile: 'silkysand',
+                    layers: layers,
+                    token: xsi_token,
+                    maxZoom: 22,
+                    subdomains: '1234',
+                    referenceTime: new Date().toISOString()
+                });
+        };
+
+        var HERE_satelliteDay = L.tileLayer(
+            'https://{s}.{base}.maps.cit.api.here.com/maptile/2.1/{type}/{mapID}/satellite.day/{z}/{x}/{y}/{size}/{format}?app_id={app_id}&app_code={app_code}&lg={language}', {
+                attribution: 'Map &copy; 1987-2014 <a href="http://developer.here.com">HERE</a>',
+                subdomains: '1234',
+                mapID: 'newest',
+                app_id: here_app_id,
+                app_code: here_app_code,
+                base: 'aerial',
+                maxNativeZoom: 20,
+                maxZoom: 22,
+                type: 'maptile',
+                language: 'eng',
+                format: 'png8',
+                size: '256'
+            }).addTo(map);
+
+        var baseLayers = {
+            "Vector": getLayer("background"),
+            "Satellite": HERE_satelliteDay.addTo(map),
+            "None": L.layerGroup()
+        };
+
+        var overlays = {
+            "Transport": getLayer("transport").addTo(map),
+            "Labels": getLayer("labels").addTo(map),
+            "Speed Patterns": getLayer("PTV_SpeedPatterns"),
+            "Traffic Incidents": getLayer("PTV_TrafficIncidents").addTo(map)
+        };
+
+        L.control.layers(baseLayers, overlays).addTo(map);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>xServer-1 routing demo</title>
+    <meta name='apple-mobile-web-app-capable' content='yes' />
+    <meta name='mobile-web-app-capable' content='yes'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@1.4.3/Control.FullScreen.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://unpkg.com/sidebar-v2@0.4.0/css/leaflet-sidebar.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-contextmenu@1.4.0/dist/leaflet.contextmenu.min.css">
+    <link rel="stylesheet" href="./index.css" />
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html,
+        body,
+        #map-container,
+        #map {
+            height: 100%;
+            font: 10pt "Helvetica Neue", Arial, Helvetica, sans-serif;
+        }
+
+        .leaflet-top-pane {
+            pointer-events: none;
+        }
+
+        div.inputForm {
+            display: table;
+        }
+
+        div.inputForm p {
+            display: table-row;
+        }
+
+        div.inputForm label {
+            display: table-cell;
+        }
+
+        div.inputForm select {
+            margin: 4px;
+            display: table-cell;
+        }
+
+        div.leaflet-routing-geocoders input {
+            width: calc(100% - 6px); /* fixes wrong line-break in chrome */
+        }
+    </style>
+</head>
+
+<body>
+<div id="map-container">
+    <div id="sidebar" class="sidebar collapsed">
+        <!-- Nav tabs -->
+        <ul class="sidebar-tabs" role="tablist">
+            <li><a href="#home" role="tab"><i class="fa fa-flag"></i></a></li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="sidebar-content active">
+            <div class="sidebar-pane" id="home">
+                <h2>
+                    xServer-1 routing demo
+                </h2>
+                <p>
+                    Drag and drop the blue waypoint markers, or grab the orange route line and drag a new via waypoint. You can also enter an
+                    address in the address text fields on the right side.
+                </p>
+                <div class="inputForm">
+                    <p>
+                        <label for="scenarioSelect">Sample Route</label>
+                        <select id="scenarioSelect" onchange="updateScenario()">
+                            <option>eu</option>
+                            <option>na</option>
+                            <option>au</option>
+                        </select>
+                    </p>
+                    <p>
+                        <label for="routingProfile">Routing Profile</label>
+                        <select id="routingProfile" onchange="updateParams()">
+                            <option>carfast</option>
+                            <option>carslow</option>
+                            <option>truckfast</option>
+                            <option>truckslow</option>
+                            <option>delivery</option>
+                            <option>emergency</option>
+                            <option>bicycle</option>
+                            <option>bicycle-oneway</option>
+                            <option>pedestrian</option>
+                        </select>
+                    </p>
+                    <p>
+                        <label for="alternativeRoutes">Alternative Routes</label>
+                        <select id="alternativeRoutes" onchange="updateParams()">
+                            <option>0</option>
+                            <option>1</option>
+                            <option>2</option>
+                        </select>
+                    </p>
+                    <p>
+                        <label for="languageSelect">Itinerary Language</label>
+                        <select id="languageSelect" onchange="updateParams()">
+                            <option>EN</option>
+                            <option>DE</option>
+                            <option>FR</option>
+                            <option>NL</option>
+                            <option>RO</option>
+                            <option>DA</option>
+                            <option>PL</option>
+                            <option>CS</option>
+                            <option>SK</option>
+                            <option>SR</option>
+                            <option>BG</option>
+                            <option>SL</option>
+                            <option>HR</option>
+                            <option>x-ptv-BOS</option>
+                            <option>UK</option>
+                            <option>RU</option>
+                            <option>ES</option>
+                            <option>IT</option>
+                            <option>SV</option>
+                            <option>PT</option>
+                        </select>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="map" class="sidebar-map"></div>
+    </div>
+
+    <script src="https://unpkg.com/jquery@3.2.1/dist/jquery.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.nontiledlayer@1.0.7/dist/NonTiledLayer.js"></script>
+    <script src="https://unpkg.com/leaflet.fullscreen@1.4.3/Control.FullScreen.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+    <script src="https://unpkg.com/sidebar-v2@0.4.0/js/leaflet-sidebar.min.js"></script>
+    <script src="https://unpkg.com/leaflet-contextmenu@1.4.0/dist/leaflet.contextmenu.min.js"></script>
+    <script src="https://unpkg.com/leaflet.icon.glyph@0.2.0/Leaflet.Icon.Glyph.js"></script>
+
+    <script src="./Control.Geocoder-xs1.js"></script>
+    <script src="./routing-machine-xs1.js"></script>
+    <script src="../../../token.js"></script>
+    <script src="./index.js"></script>
+</body>
+
+</html>

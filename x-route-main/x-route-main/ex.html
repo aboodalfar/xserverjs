@@ -1,0 +1,113 @@
+<html>
+    <head>
+        <title>xRoute Sample</title>
+        <script src="javascript/xroute-client.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    </head>
+    <body>
+
+        <div id="map" style="height: 100%;width: 700px">
+
+        </div>
+
+    </body>
+
+
+    <footer>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <script>
+
+
+            var A = {
+                "$type": "OnRoadWaypoint",
+                "location": {
+                    "coordinate": {
+                        "x": 6.1561739444732675,
+                        "y": 49.581704333851874
+                    },
+                    "considerAlternativeNearByRoads": true
+                }
+            };
+
+            var B = {
+                "$type": "OnRoadWaypoint",
+                "location": {
+                    "coordinate": {
+                        "x": 6.1256572,
+                        "y": 49.4816576
+                    }
+                }
+            };
+
+            var C = {
+                "$type": "ManipulateRouteWaypoint",
+                "coordinate": {
+                    "x": 6.3256572,
+                    "y": 49.5516576
+                },
+                "radius": 1000
+            };
+
+            var map = new L.Map('map', {
+                center: [49.61, 6.125],
+                zoom: 13
+            });
+
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+
+
+            var xroute = new XRouteClient();
+            xroute.setCredentials('xtok', '5e55bf41-bbe2-473c-8286-49f09489bad1');
+            // Add tile layer to map
+            let xServerUrl = "https://xserver2-dashboard.cloud.ptvgroup.com/services/";
+            var tileUrl = xServerUrl + '/services/rest/XMap/tile/{z}/{x}/{y}';
+            var tileLayer = new L.TileLayer(tileUrl, {
+                minZoom: 3,
+                maxZoom: 18,
+                noWrap: true
+            }).addTo(map);
+
+
+            xroute.calculateRoute({
+                "waypoints": [A, C, B],
+                "resultFields": {
+                    "polyline": true
+                },
+                "routeOptions": {
+                    "polylineOptions": {
+                        "elevations": true
+                    }
+                }
+            }, routingFinished);
+
+            function displayPolyline(poly) {
+                var polyline = [];
+                for (var i = 0; i < poly.length; ++i) {
+                    polyline.push(L.latLng(poly[i].y, poly[i].x));
+                }
+
+                polylineLayer = L.polyline(polyline, {
+                    color: '#2882C8',
+                    weight: 8
+                });
+
+                polylineLayer.addTo(map);
+                map.fitBounds(polylineLayer.getBounds());
+            }
+            ;
+
+            function routingFinished(route, exception) {
+                var polyline = route.polyline.plain.polyline;
+                displayPolyline(polyline);
+               // print(route.distance + 'm in ' + route.travelTime + 's starting at ' + polyline[0].z + 'm elevation');
+            }
+
+        </script>    
+    </footer>
+
+</html>
+
